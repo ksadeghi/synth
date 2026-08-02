@@ -1,0 +1,15 @@
+{
+  "columns": [
+    { "name": "id",          "type": "serial" },
+    { "name": "full_name",   "type": "varchar", "length": 100 },
+    { "name": "email",       "type": "varchar", "length": 150 },
+    { "name": "phone",       "type": "varchar", "length": 20  },
+    { "name": "address",     "type": "text" },
+    { "name": "age",         "type": "integer", "min": 18, "max": 80 },
+    { "name": "salary",      "type": "decimal", "min": 30000, "max": 150000 },
+    { "name": "is_active",   "type": "boolean" },
+    { "name": "created_at",  "type": "timestamp" },
+    { "name": "birth_date",  "type": "date" },
+    { "name": "user_uuid",   "type": "uuid" }
+  ]
+}
