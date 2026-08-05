@@ -1,0 +1,150 @@
+{
+  "tables": [
+    {
+      "name": "customers",
+      "columns": [
+        { "name": "customer_id",    "type": "serial" },
+        { "name": "full_name",      "type": "varchar",  "length": 150 },
+        { "name": "email",          "type": "varchar",  "length": 200 },
+        { "name": "phone",          "type": "varchar",  "length": 30  },
+        { "name": "date_of_birth",  "type": "date" },
+        { "name": "address",        "type": "text" },
+        { "name": "country_code",   "type": "varchar",  "length": 3,
+          "samples": ["US", "GB", "CA", "AU", "DE", "FR", "SG", "AE"] },
+        { "name": "kyc_status",     "type": "varchar",  "length": 20,
+          "samples": ["VERIFIED", "PENDING", "REJECTED"] },
+        { "name": "risk_rating",    "type": "varchar",  "length": 10,
+          "samples": ["LOW", "MEDIUM", "HIGH"] },
+        { "name": "created_at",     "type": "timestamp" },
+        { "name": "is_active",      "type": "boolean" }
+      ],
+      "foreign_keys": []
+    },
+    {
+      "name": "accounts",
+      "columns": [
+        { "name": "account_id",     "type": "serial" },
+        { "name": "customer_id",    "type": "integer" },
+        { "name": "account_number", "type": "varchar",  "length": 20,
+          "samples": ["[0-9]{10}"] },
+        { "name": "account_type",   "type": "varchar",  "length": 30,
+          "samples": ["CHECKING", "SAVINGS", "INVESTMENT", "CREDIT", "LOAN"] },
+        { "name": "currency",       "type": "varchar",  "length": 3,
+          "samples": ["USD", "EUR", "GBP", "CAD", "AUD", "SGD", "AED"] },
+        { "name": "balance",        "type": "decimal",  "min": 0,     "max": 500000 },
+        { "name": "credit_limit",   "type": "decimal",  "min": 0,     "max": 100000 },
+        { "name": "interest_rate",  "type": "decimal",  "min": 0.5,   "max": 25.0 },
+        { "name": "status",         "type": "varchar",  "length": 20,
+          "samples": ["ACTIVE", "DORMANT", "CLOSED", "FROZEN"] },
+        { "name": "opened_at",      "type": "timestamp" }
+      ],
+      "foreign_keys": [
+        { "column": "customer_id", "ref_table": "customers", "ref_column": "customer_id" }
+      ]
+    },
+    {
+      "name": "beneficiaries",
+      "columns": [
+        { "name": "beneficiary_id",   "type": "serial" },
+        { "name": "customer_id",      "type": "integer" },
+        { "name": "full_name",        "type": "varchar",  "length": 150 },
+        { "name": "bank_name",        "type": "varchar",  "length": 100,
+          "samples": ["Chase", "Barclays", "HSBC", "Wells Fargo", "Citibank", "Deutsche Bank", "BNP Paribas"] },
+        { "name": "account_number",   "type": "varchar",  "length": 20,
+          "samples": ["[0-9]{10}"] },
+        { "name": "routing_number",   "type": "varchar",  "length": 15,
+          "samples": ["[0-9]{9}"] },
+        { "name": "currency",         "type": "varchar",  "length": 3,
+          "samples": ["USD", "EUR", "GBP", "CAD", "AUD"] },
+        { "name": "country_code",     "type": "varchar",  "length": 3,
+          "samples": ["US", "GB", "CA", "AU", "DE", "FR"] },
+        { "name": "is_verified",      "type": "boolean" },
+        { "name": "created_at",       "type": "timestamp" }
+      ],
+      "foreign_keys": [
+        { "column": "customer_id", "ref_table": "customers", "ref_column": "customer_id" }
+      ]
+    },
+    {
+      "name": "transactions",
+      "columns": [
+        { "name": "transaction_id",   "type": "serial" },
+        { "name": "account_id",       "type": "integer" },
+        { "name": "reference_number", "type": "varchar",  "length": 30,
+          "samples": ["TXN-[A-Z]{2}[0-9]{8}"] },
+        { "name": "transaction_type", "type": "varchar",  "length": 30,
+          "samples": ["DEBIT", "CREDIT", "TRANSFER", "WITHDRAWAL", "DEPOSIT", "FEE", "INTEREST"] },
+        { "name": "amount",           "type": "decimal",  "min": 0.01, "max": 50000 },
+        { "name": "currency",         "type": "varchar",  "length": 3,
+          "samples": ["USD", "EUR", "GBP", "CAD", "AUD"] },
+        { "name": "exchange_rate",    "type": "decimal",  "min": 0.5,  "max": 3.5 },
+        { "name": "balance_after",    "type": "decimal",  "min": 0,    "max": 500000 },
+        { "name": "description",      "type": "varchar",  "length": 255,
+          "samples": [
+            "Online purchase", "ATM withdrawal", "Wire transfer",
+            "Direct deposit", "Monthly fee", "Interest payment",
+            "Payroll deposit", "Utility bill payment", "Mortgage payment"
+          ] },
+        { "name": "channel",          "type": "varchar",  "length": 20,
+          "samples": ["ONLINE", "MOBILE", "ATM", "BRANCH", "POS", "API"] },
+        { "name": "status",           "type": "varchar",  "length": 20,
+          "samples": ["COMPLETED", "PENDING", "FAILED", "REVERSED", "ON_HOLD"] },
+        { "name": "created_at",       "type": "timestamp" }
+      ],
+      "foreign_keys": [
+        { "column": "account_id", "ref_table": "accounts", "ref_column": "account_id" }
+      ]
+    },
+    {
+      "name": "transfers",
+      "columns": [
+        { "name": "transfer_id",       "type": "serial" },
+        { "name": "from_account_id",   "type": "integer" },
+        { "name": "beneficiary_id",    "type": "integer" },
+        { "name": "reference_number",  "type": "varchar",  "length": 30,
+          "samples": ["TRF-[A-Z]{3}[0-9]{6}"] },
+        { "name": "amount",            "type": "decimal",  "min": 1,    "max": 100000 },
+        { "name": "currency",          "type": "varchar",  "length": 3,
+          "samples": ["USD", "EUR", "GBP", "CAD", "AUD"] },
+        { "name": "exchange_rate",     "type": "decimal",  "min": 0.5,  "max": 3.5 },
+        { "name": "fee",               "type": "decimal",  "min": 0,    "max": 50 },
+        { "name": "transfer_type",     "type": "varchar",  "length": 20,
+          "samples": ["DOMESTIC", "INTERNATIONAL", "INTERNAL"] },
+        { "name": "status",            "type": "varchar",  "length": 20,
+          "samples": ["COMPLETED", "PENDING", "FAILED", "CANCELLED"] },
+        { "name": "initiated_at",      "type": "timestamp" },
+        { "name": "completed_at",      "type": "timestamp" }
+      ],
+      "foreign_keys": [
+        { "column": "from_account_id", "ref_table": "accounts",      "ref_column": "account_id"    },
+        { "column": "beneficiary_id",  "ref_table": "beneficiaries", "ref_column": "beneficiary_id" }
+      ]
+    },
+    {
+      "name": "fraud_alerts",
+      "columns": [
+        { "name": "alert_id",        "type": "serial" },
+        { "name": "transaction_id",  "type": "integer" },
+        { "name": "account_id",      "type": "integer" },
+        { "name": "alert_type",      "type": "varchar",  "length": 50,
+          "samples": [
+            "UNUSUAL_LOCATION", "HIGH_VALUE", "RAPID_SUCCESSION",
+            "BLACKLISTED_BENEFICIARY", "VELOCITY_BREACH", "DEVICE_MISMATCH"
+          ] },
+        { "name": "severity",        "type": "varchar",  "length": 10,
+          "samples": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+        { "name": "score",           "type": "decimal",  "min": 0,   "max": 100 },
+        { "name": "status",          "type": "varchar",  "length": 20,
+          "samples": ["OPEN", "UNDER_REVIEW", "CLOSED", "ESCALATED", "FALSE_POSITIVE"] },
+        { "name": "reviewed_by",     "type": "varchar",  "length": 100 },
+        { "name": "notes",           "type": "text" },
+        { "name": "created_at",      "type": "timestamp" },
+        { "name": "resolved_at",     "type": "timestamp" }
+      ],
+      "foreign_keys": [
+        { "column": "transaction_id", "ref_table": "transactions", "ref_column": "transaction_id" },
+        { "column": "account_id",     "ref_table": "accounts",     "ref_column": "account_id"     }
+      ]
+    }
+  ]
+}

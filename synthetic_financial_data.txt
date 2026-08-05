@@ -1,0 +1,251 @@
+-- Synthetic data export
+-- Generated: 2026-08-03 23:54:36 UTC
+
+-- Drop existing tables (children first)
+DROP TABLE IF EXISTS "fraud_alerts";
+DROP TABLE IF EXISTS "transfers";
+DROP TABLE IF EXISTS "transactions";
+DROP TABLE IF EXISTS "beneficiaries";
+DROP TABLE IF EXISTS "accounts";
+DROP TABLE IF EXISTS "customers";
+
+-- --------------------------------------------------------
+-- Table: customers
+-- --------------------------------------------------------
+CREATE TABLE "customers" (
+    "customer_id" INTEGER PRIMARY KEY,
+    "full_name" VARCHAR(150),
+    "email" VARCHAR(200),
+    "phone" VARCHAR(30),
+    "date_of_birth" DATE,
+    "address" TEXT,
+    "country_code" VARCHAR(3),
+    "kyc_status" VARCHAR(20),
+    "risk_rating" VARCHAR(10),
+    "created_at" TIMESTAMP,
+    "is_active" BOOLEAN
+);
+
+INSERT INTO "customers" ("customer_id", "full_name", "email", "phone", "date_of_birth", "address", "country_code", "kyc_status", "risk_rating", "created_at", "is_active") VALUES
+    (6624, 'Leo Jackson', 'bob.wilson@mail.com', '+1-624-232-6467', '2008-05-18', '7406 Maple Dr, Shelbyville, MI', 'AE', 'REJECTED', 'MEDIUM', '2006-10-01', FALSE),
+    (3850, 'Olivia Taylor', 'frank.johnson@example.com', '+1-502-696-5513', '2007-07-18', '808 Cedar Ln, Springfield, NC', 'GB', 'PENDING', 'MEDIUM', '2016-02-07', FALSE),
+    (5390, 'Nathan Smith', 'iris.johnson@test.org', '+1-646-579-7636', '2000-07-02', '4630 Elm Blvd, Ogdenville, NY', 'DE', 'PENDING', 'HIGH', '2001-03-24', FALSE),
+    (4654, 'Bob Davis', 'jack.taylor@sample.net', '+1-946-353-8916', '2022-04-04', '3712 Cedar Ln, Springfield, FL', 'DE', 'VERIFIED', 'MEDIUM', '2017-12-16', TRUE),
+    (3012, 'Olivia Smith', 'frank.wilson@example.com', '+1-719-517-3793', '2025-03-22', '8258 Cedar Ln, Ogdenville, IL', 'GB', 'REJECTED', 'MEDIUM', '2007-02-17', TRUE),
+    (3544, 'Frank Wilson', 'alice.moore@demo.io', '+1-427-448-9481', '2008-07-18', '9873 Pine Rd, Springfield, FL', 'AE', 'REJECTED', 'HIGH', '2000-06-24', FALSE),
+    (9460, 'Grace Anderson', 'leo.moore@example.com', '+1-304-655-1522', '2021-03-06', '1173 Elm Blvd, Springfield, PA', 'DE', 'PENDING', 'LOW', '2010-11-09', FALSE),
+    (4042, 'Olivia Thomas', 'frank.williams@demo.io', '+1-809-445-6276', '2006-07-05', '424 Maple Dr, Capital City, IL', 'GB', 'REJECTED', 'HIGH', '2012-10-06', TRUE),
+    (6503, 'Bob Miller', 'paul.davis@sample.net', '+1-844-290-1846', '2000-01-09', '4396 Maple Dr, Springfield, FL', 'CA', 'REJECTED', 'HIGH', '2024-06-23', TRUE),
+    (769, 'Henry Taylor', 'david.jackson@sample.net', '+1-748-497-6344', '2015-11-27', '1708 Pine Rd, Springfield, GA', 'CA', 'PENDING', 'HIGH', '2004-01-16', FALSE),
+    (5164, 'Iris Davis', 'olivia.thomas@example.com', '+1-989-765-8284', '2014-02-20', '6762 Main St, Capital City, NC', 'AU', 'REJECTED', 'LOW', '2003-03-02', FALSE),
+    (4832, 'Henry Davis', 'carol.anderson@demo.io', '+1-968-861-3371', '2010-02-18', '1337 Cedar Ln, Springfield, NC', 'AU', 'REJECTED', 'MEDIUM', '2010-02-09', FALSE),
+    (9612, 'Iris Anderson', 'leo.jones@mail.com', '+1-973-289-4526', '2018-02-12', '5115 Oak Ave, Springfield, NY', 'AE', 'VERIFIED', 'LOW', '2020-04-07', TRUE),
+    (6192, 'David Moore', 'alice.brown@sample.net', '+1-914-523-3853', '2019-02-20', '2790 Maple Dr, Capital City, CA', 'AU', 'REJECTED', 'LOW', '2009-01-15', TRUE),
+    (5271, 'Olivia Miller', 'frank.thomas@sample.net', '+1-430-382-5601', '2011-11-03', '5014 Maple Dr, Shelbyville, NC', 'GB', 'REJECTED', 'HIGH', '2004-04-18', FALSE),
+    (3407, 'Olivia Thomas', 'paul.taylor@sample.net', '+1-282-743-8351', '2004-06-06', '2171 Main St, Springfield, TX', 'AE', 'PENDING', 'HIGH', '2013-11-15', FALSE),
+    (2601, 'Alice Davis', 'henry.jones@sample.net', '+1-992-873-4895', '2013-12-16', '6462 Elm Blvd, Shelbyville, CA', 'AU', 'PENDING', 'MEDIUM', '2024-11-23', FALSE),
+    (7622, 'Jack Miller', 'jack.davis@sample.net', '+1-413-592-4239', '2025-10-11', '5175 Elm Blvd, Capital City, NY', 'CA', 'PENDING', 'LOW', '2007-05-27', TRUE),
+    (4217, 'Maria Jones', 'frank.garcia@sample.net', '+1-219-563-5014', '2007-05-11', '8777 Elm Blvd, Capital City, MI', 'AU', 'PENDING', 'MEDIUM', '2021-12-10', TRUE),
+    (6811, 'Eva Smith', 'bob.wilson@mail.com', '+1-367-817-9067', '2021-10-19', '4134 Main St, Capital City, CA', 'DE', 'VERIFIED', 'MEDIUM', '2013-09-03', TRUE);
+
+-- --------------------------------------------------------
+-- Table: accounts
+-- --------------------------------------------------------
+CREATE TABLE "accounts" (
+    "account_id" INTEGER PRIMARY KEY,
+    "customer_id" INTEGER,
+    "account_number" VARCHAR(20),
+    "account_type" VARCHAR(30),
+    "currency" VARCHAR(3),
+    "balance" DECIMAL(18,2),
+    "credit_limit" DECIMAL(18,2),
+    "interest_rate" DECIMAL(18,2),
+    "status" VARCHAR(20),
+    "opened_at" TIMESTAMP,
+    FOREIGN KEY ("customer_id") REFERENCES "customers"("customer_id")
+);
+
+INSERT INTO "accounts" ("account_id", "customer_id", "account_number", "account_type", "currency", "balance", "credit_limit", "interest_rate", "status", "opened_at") VALUES
+    (4965, 3850, '8640808558', 'CREDIT', 'SGD', 131263.63, 11969.6, 17.09, 'ACTIVE', '2025-12-17 18:58:51'),
+    (6220, 3544, '0367141541', 'CREDIT', 'SGD', 67506.09, 61861.27, 7.03, 'ACTIVE', '2014-02-23 08:11:49'),
+    (8367, 5164, '8428132875', 'SAVINGS', 'AUD', 467238.82, 5969.89, 15.71, 'DORMANT', '2015-09-20 03:14:57'),
+    (354, 9612, '5991297037', 'SAVINGS', 'SGD', 347907.53, 978.05, 19.1, 'ACTIVE', '2023-09-19 08:03:02'),
+    (1603, 5271, '7024422816', 'CHECKING', 'AED', 268410.17, 35732.65, 20.69, 'DORMANT', '2006-09-24 14:29:32'),
+    (6988, 6192, '2714958077', 'SAVINGS', 'AED', 202825.77, 86488.76, 21.73, 'ACTIVE', '2018-01-25 02:22:23'),
+    (4990, 5390, '4332987653', 'INVESTMENT', 'SGD', 362175.54, 89198.7, 16.25, 'ACTIVE', '2025-02-04 23:34:45'),
+    (9179, 5164, '1652082109', 'INVESTMENT', 'USD', 391773.55, 28779.0, 15.62, 'CLOSED', '2001-06-04 09:13:30'),
+    (8271, 769, '0743786901', 'INVESTMENT', 'AUD', 79486.9, 54396.18, 4.95, 'DORMANT', '2022-04-04 08:56:56'),
+    (9619, 5271, '4884114441', 'INVESTMENT', 'SGD', 345230.65, 37530.06, 8.88, 'ACTIVE', '2020-06-03 21:47:20'),
+    (2785, 3012, '3577054771', 'SAVINGS', 'AED', 405337.55, 76710.37, 3.7, 'FROZEN', '2008-03-14 21:55:35'),
+    (4278, 5390, '3604111635', 'SAVINGS', 'AED', 383.4, 37376.35, 13.0, 'DORMANT', '2021-02-03 00:19:17'),
+    (4591, 4654, '7669468965', 'CREDIT', 'EUR', 221476.41, 97927.24, 3.98, 'DORMANT', '2007-06-26 15:24:40'),
+    (3409, 3544, '5135559307', 'SAVINGS', 'SGD', 61757.16, 47251.67, 5.46, 'ACTIVE', '2001-12-13 01:42:56'),
+    (5428, 9612, '6498525132', 'INVESTMENT', 'SGD', 381596.96, 77018.61, 11.03, 'ACTIVE', '2022-02-17 09:59:00'),
+    (5978, 4832, '8189867614', 'CREDIT', 'AED', 228446.89, 99028.05, 4.32, 'ACTIVE', '2021-09-22 23:35:36'),
+    (5066, 5164, '7983206407', 'CREDIT', 'CAD', 480730.78, 87829.36, 3.44, 'ACTIVE', '2015-12-28 03:59:20'),
+    (6117, 3544, '2892457461', 'CREDIT', 'EUR', 368299.54, 94373.52, 6.26, 'ACTIVE', '2014-09-28 11:27:34'),
+    (3366, 2601, '7206961996', 'INVESTMENT', 'AED', 134680.68, 75689.85, 17.83, 'DORMANT', '2011-12-17 05:42:36'),
+    (1818, 2601, '8408170796', 'CREDIT', 'USD', 285567.07, 47874.14, 13.4, 'ACTIVE', '2006-08-02 21:44:12');
+
+-- --------------------------------------------------------
+-- Table: beneficiaries
+-- --------------------------------------------------------
+CREATE TABLE "beneficiaries" (
+    "beneficiary_id" INTEGER,
+    "customer_id" INTEGER,
+    "full_name" VARCHAR(150),
+    "bank_name" VARCHAR(100),
+    "account_number" VARCHAR(20),
+    "routing_number" VARCHAR(15),
+    "currency" VARCHAR(3),
+    "country_code" VARCHAR(3),
+    "is_verified" BOOLEAN,
+    "created_at" TIMESTAMP,
+    FOREIGN KEY ("customer_id") REFERENCES "customers"("customer_id")
+);
+
+INSERT INTO "beneficiaries" ("beneficiary_id", "customer_id", "full_name", "bank_name", "account_number", "routing_number", "currency", "country_code", "is_verified", "created_at") VALUES
+    (5648, 6503, 'Karen Anderson', 'Deutsche Bank', '3849012955', '225211510', 'USD', 'FR', TRUE, '2020-12-22'),
+    (9293, 5164, 'Karen Thomas', 'Wells Fargo', '7499326604', '494061610', 'GBP', 'GB', TRUE, '2013-02-28'),
+    (4626, 769, 'Nathan Brown', 'Deutsche Bank', '2264053266', '904698368', 'CAD', 'DE', TRUE, '2007-11-09'),
+    (2193, 6192, 'Carol Smith', 'Wells Fargo', '3483087991', '125324731', 'GBP', 'US', TRUE, '2016-07-23'),
+    (9684, 9612, 'Alice Williams', 'Chase', '6714787880', '377538149', 'EUR', 'GB', FALSE, '2023-05-20'),
+    (4256, 3407, 'Henry Williams', 'BNP Paribas', '4678509387', '373736386', 'USD', 'US', TRUE, '2019-01-16'),
+    (5043, 3544, 'Jack Jones', 'Barclays', '7352133987', '291405229', 'EUR', 'US', TRUE, '2004-01-03'),
+    (4770, 4042, 'Iris Miller', 'Wells Fargo', '0616244778', '600026726', 'GBP', 'FR', TRUE, '2021-09-18'),
+    (7059, 4042, 'Olivia Jones', 'Citibank', '4199445412', '144057009', 'USD', 'US', FALSE, '2009-07-21'),
+    (9351, 5164, 'Frank Thomas', 'Citibank', '7366975244', '057293139', 'GBP', 'GB', TRUE, '2013-10-23'),
+    (3821, 5271, 'Nathan Thomas', 'Deutsche Bank', '9723199588', '613413183', 'CAD', 'FR', FALSE, '2007-12-19'),
+    (6682, 5271, 'Eva Jones', 'Barclays', '2827402374', '154483596', 'USD', 'FR', TRUE, '2002-05-19'),
+    (9503, 6811, 'David Taylor', 'Deutsche Bank', '8569622466', '301364088', 'EUR', 'GB', FALSE, '2018-01-03'),
+    (2543, 4654, 'David Williams', 'Chase', '7514866642', '346815602', 'GBP', 'GB', FALSE, '2006-01-13'),
+    (9261, 769, 'Henry Davis', 'HSBC', '3418770201', '525825879', 'USD', 'FR', TRUE, '2023-04-16'),
+    (4679, 4042, 'Maria Smith', 'Barclays', '7179108809', '167520655', 'AUD', 'GB', FALSE, '2021-03-25'),
+    (7099, 5271, 'Maria Thomas', 'Chase', '0887584269', '345108739', 'EUR', 'US', FALSE, '2022-02-21'),
+    (6197, 5164, 'Frank Taylor', 'Deutsche Bank', '6512485740', '722108524', 'CAD', 'FR', TRUE, '2022-08-05'),
+    (8098, 6624, 'Leo Taylor', 'Citibank', '1757672605', '913587407', 'USD', 'GB', FALSE, '2018-05-30'),
+    (3565, 3850, 'Leo Smith', 'Wells Fargo', '6377124743', '699084352', 'USD', 'CA', FALSE, '2010-04-07');
+
+-- --------------------------------------------------------
+-- Table: transactions
+-- --------------------------------------------------------
+CREATE TABLE "transactions" (
+    "transaction_id" INTEGER PRIMARY KEY,
+    "account_id" INTEGER,
+    "reference_number" VARCHAR(30),
+    "transaction_type" VARCHAR(30),
+    "amount" DECIMAL(18,2),
+    "currency" VARCHAR(3),
+    "exchange_rate" DECIMAL(18,2),
+    "balance_after" DECIMAL(18,2),
+    "description" VARCHAR(255),
+    "channel" VARCHAR(20),
+    "status" VARCHAR(20),
+    "created_at" TIMESTAMP,
+    FOREIGN KEY ("account_id") REFERENCES "accounts"("account_id")
+);
+
+INSERT INTO "transactions" ("transaction_id", "account_id", "reference_number", "transaction_type", "amount", "currency", "exchange_rate", "balance_after", "description", "channel", "status", "created_at") VALUES
+    (1150, 4965, 'TXN-WM80818790', 'FEE', 1620.11, 'EUR', 3.06, 443518.23, 'Direct deposit', 'ATM', 'ON_HOLD', '2025-07-10'),
+    (8202, 9179, 'TXN-GD07432779', 'DEBIT', 19135.67, 'GBP', 0.72, 211794.7, 'Monthly fee', 'BRANCH', 'PENDING', '2003-09-19'),
+    (4753, 9619, 'TXN-GK30596410', 'DEPOSIT', 29756.71, 'AUD', 2.49, 166420.82, 'Mortgage payment', 'POS', 'FAILED', '2016-11-23'),
+    (2297, 1818, 'TXN-PT38407744', 'TRANSFER', 13335.39, 'AUD', 1.52, 233064.93, 'Payroll deposit', 'API', 'COMPLETED', '2003-01-25'),
+    (7189, 1603, 'TXN-UR11453648', 'INTEREST', 47097.47, 'AUD', 2.99, 152420.26, 'Wire transfer', 'POS', 'FAILED', '2015-05-28'),
+    (1885, 354, 'TXN-QU24611371', 'TRANSFER', 15810.4, 'USD', 2.81, 425472.31, 'Monthly fee', 'ONLINE', 'ON_HOLD', '2001-03-08'),
+    (8501, 4990, 'TXN-DH43611842', 'DEBIT', 9936.53, 'CAD', 2.24, 394744.84, 'Mortgage payment', 'ATM', 'REVERSED', '2022-08-19'),
+    (1638, 4990, 'TXN-BN39109644', 'TRANSFER', 7903.3, 'CAD', 0.94, 412839.45, 'Payroll deposit', 'BRANCH', 'REVERSED', '2005-09-08'),
+    (6245, 5066, 'TXN-XZ04611141', 'TRANSFER', 30211.59, 'CAD', 1.61, 293759.39, 'Utility bill payment', 'ONLINE', 'COMPLETED', '2007-08-22'),
+    (1653, 354, 'TXN-YF23515642', 'FEE', 31399.62, 'CAD', 0.68, 53616.23, 'Wire transfer', 'POS', 'COMPLETED', '2025-03-13'),
+    (2338, 4965, 'TXN-ZP96336570', 'INTEREST', 35579.33, 'CAD', 3.43, 165261.35, 'Utility bill payment', 'ATM', 'ON_HOLD', '2009-12-21'),
+    (8402, 4965, 'TXN-PZ19838252', 'CREDIT', 20829.98, 'USD', 1.88, 284899.99, 'Wire transfer', 'ATM', 'COMPLETED', '2005-12-02'),
+    (4020, 4591, 'TXN-BM18215638', 'FEE', 24018.55, 'GBP', 3.0, 167631.03, 'Payroll deposit', 'ONLINE', 'COMPLETED', '2000-11-08'),
+    (1926, 3409, 'TXN-NM04314811', 'WITHDRAWAL', 21806.8, 'CAD', 1.5, 150320.56, 'Monthly fee', 'POS', 'REVERSED', '2011-05-20'),
+    (5481, 1603, 'TXN-SB82366689', 'FEE', 41315.09, 'CAD', 0.79, 129001.98, 'Monthly fee', 'POS', 'PENDING', '2001-01-01'),
+    (8136, 8271, 'TXN-JO13568699', 'DEPOSIT', 32335.72, 'EUR', 0.97, 101012.53, 'Payroll deposit', 'BRANCH', 'REVERSED', '2020-09-10'),
+    (8313, 1603, 'TXN-RH98020978', 'WITHDRAWAL', 10539.86, 'CAD', 1.24, 449534.26, 'Wire transfer', 'MOBILE', 'PENDING', '2011-02-14'),
+    (7710, 6988, 'TXN-VH50688115', 'DEBIT', 35831.85, 'GBP', 2.16, 210520.31, 'Interest payment', 'ONLINE', 'PENDING', '2010-10-21'),
+    (1421, 8367, 'TXN-XH90845704', 'DEBIT', 21629.61, 'CAD', 2.11, 390548.54, 'Monthly fee', 'API', 'COMPLETED', '2004-07-21'),
+    (5705, 4965, 'TXN-HS26545857', 'TRANSFER', 42633.69, 'EUR', 1.41, 98059.81, 'Wire transfer', 'ONLINE', 'ON_HOLD', '2002-02-19');
+
+-- --------------------------------------------------------
+-- Table: transfers
+-- --------------------------------------------------------
+CREATE TABLE "transfers" (
+    "transfer_id" INTEGER PRIMARY KEY,
+    "from_account_id" INTEGER,
+    "beneficiary_id" INTEGER,
+    "reference_number" VARCHAR(30),
+    "amount" DECIMAL(18,2),
+    "currency" VARCHAR(3),
+    "exchange_rate" DECIMAL(18,2),
+    "fee" DECIMAL(18,2),
+    "transfer_type" VARCHAR(20),
+    "status" VARCHAR(20),
+    "initiated_at" TIMESTAMP,
+    "completed_at" TIMESTAMP,
+    FOREIGN KEY ("from_account_id") REFERENCES "accounts"("account_id"),
+    FOREIGN KEY ("beneficiary_id") REFERENCES "beneficiaries"("beneficiary_id")
+);
+
+INSERT INTO "transfers" ("transfer_id", "from_account_id", "beneficiary_id", "reference_number", "amount", "currency", "exchange_rate", "fee", "transfer_type", "status", "initiated_at", "completed_at") VALUES
+    (1969, 1603, 7059, 'TRF-HFE117453', 11841.47, 'AUD', 1.04, 38.3, 'DOMESTIC', 'PENDING', '2022-06-11 13:30:45', '2007-05-11 12:43:35'),
+    (6673, 9179, 5043, 'TRF-NTX324870', 28440.01, 'CAD', 2.43, 32.88, 'DOMESTIC', 'FAILED', '2016-12-23 22:37:17', '2020-08-23 23:13:52'),
+    (2926, 354, 3821, 'TRF-KZP787240', 81074.27, 'GBP', 2.07, 23.06, 'INTERNATIONAL', 'CANCELLED', '2008-12-14 13:05:31', '2008-06-19 02:09:45'),
+    (2736, 5978, 5648, 'TRF-IHP547557', 78331.21, 'GBP', 0.67, 30.35, 'INTERNATIONAL', 'FAILED', '2013-09-17 08:17:41', '2014-11-17 19:24:10'),
+    (1708, 9179, 6197, 'TRF-JYF180419', 41911.44, 'CAD', 1.8, 48.08, 'INTERNAL', 'PENDING', '2010-02-14 20:17:10', '2012-08-23 17:30:01'),
+    (7104, 1818, 6682, 'TRF-JTG512456', 96333.16, 'AUD', 0.67, 30.17, 'DOMESTIC', 'CANCELLED', '2015-03-02 19:13:22', '2019-10-13 21:36:23'),
+    (5016, 4591, 8098, 'TRF-NKD563870', 2874.55, 'CAD', 2.43, 32.19, 'DOMESTIC', 'CANCELLED', '2022-05-26 20:45:37', '2006-06-12 04:36:54'),
+    (5211, 4990, 2543, 'TRF-QND388440', 40226.39, 'USD', 1.01, 49.28, 'INTERNAL', 'COMPLETED', '2012-12-08 13:28:45', '2024-01-15 09:31:32'),
+    (1948, 354, 4679, 'TRF-ELD765057', 70270.16, 'CAD', 1.8, 17.49, 'INTERNAL', 'CANCELLED', '2019-07-17 15:45:39', '2005-10-10 18:52:38'),
+    (8505, 4990, 2543, 'TRF-KML500836', 80698.66, 'GBP', 1.26, 4.65, 'INTERNATIONAL', 'PENDING', '2024-07-04 23:59:02', '2003-10-16 06:46:01'),
+    (5676, 9179, 7099, 'TRF-CNF041507', 48245.91, 'GBP', 3.3, 23.08, 'DOMESTIC', 'COMPLETED', '2005-09-01 02:27:43', '2000-01-30 01:14:40'),
+    (3483, 354, 4770, 'TRF-JKZ792385', 54424.86, 'AUD', 0.86, 1.81, 'INTERNATIONAL', 'CANCELLED', '2010-05-19 21:28:22', '2012-11-13 00:31:15'),
+    (9408, 6117, 8098, 'TRF-SCY718668', 57877.78, 'USD', 2.84, 19.02, 'INTERNATIONAL', 'FAILED', '2008-03-23 22:32:32', '2021-03-29 22:32:23'),
+    (3524, 354, 3821, 'TRF-LUJ784609', 12124.61, 'CAD', 3.12, 46.91, 'INTERNAL', 'COMPLETED', '2005-10-27 02:53:14', '2006-04-10 14:28:58'),
+    (6207, 5066, 9351, 'TRF-BAU605928', 97394.07, 'EUR', 2.85, 35.28, 'INTERNAL', 'CANCELLED', '2014-05-07 19:12:49', '2011-09-15 20:31:44'),
+    (3283, 8271, 9684, 'TRF-MKG586720', 97295.9, 'GBP', 1.81, 41.96, 'INTERNAL', 'COMPLETED', '2018-02-07 09:54:41', '2018-10-11 09:25:25'),
+    (9891, 9179, 4256, 'TRF-PTZ475655', 19009.11, 'CAD', 1.16, 36.04, 'INTERNAL', 'COMPLETED', '2016-11-02 17:32:55', '2018-01-20 08:43:35'),
+    (8643, 8367, 4256, 'TRF-QYK077962', 67533.33, 'AUD', 3.2, 24.07, 'INTERNATIONAL', 'PENDING', '2004-02-18 15:52:03', '2003-01-22 21:46:50'),
+    (6893, 6988, 9503, 'TRF-RUR002358', 72647.17, 'USD', 3.08, 35.96, 'DOMESTIC', 'PENDING', '2005-07-05 05:12:03', '2014-03-08 23:45:39'),
+    (2874, 6117, 9351, 'TRF-YMX731967', 62976.38, 'GBP', 1.96, 45.2, 'INTERNATIONAL', 'CANCELLED', '2012-09-23 07:44:57', '2009-10-11 06:13:58');
+
+-- --------------------------------------------------------
+-- Table: fraud_alerts
+-- --------------------------------------------------------
+CREATE TABLE "fraud_alerts" (
+    "alert_id" INTEGER,
+    "transaction_id" INTEGER,
+    "account_id" INTEGER,
+    "alert_type" VARCHAR(50),
+    "severity" VARCHAR(10),
+    "score" DECIMAL(18,2),
+    "status" VARCHAR(20),
+    "reviewed_by" VARCHAR(100),
+    "notes" TEXT,
+    "created_at" TIMESTAMP,
+    "resolved_at" TIMESTAMP,
+    FOREIGN KEY ("transaction_id") REFERENCES "transactions"("transaction_id"),
+    FOREIGN KEY ("account_id") REFERENCES "accounts"("account_id")
+);
+
+INSERT INTO "fraud_alerts" ("alert_id", "transaction_id", "account_id", "alert_type", "severity", "score", "status", "reviewed_by", "notes", "created_at", "resolved_at") VALUES
+    (6066, 1926, 3366, 'HIGH_VALUE', 'MEDIUM', 50.7, 'UNDER_REVIEW', 'xbfprnltauniwkubxdr', 'walvsw', '2006-08-01', '2011-12-29 10:32:37'),
+    (3871, 8501, 5428, 'DEVICE_MISMATCH', 'MEDIUM', 77.43, 'FALSE_POSITIVE', 'lkhnjqsioetherkxzjfc', 'pcdfiveynnbzcyrvpsik', '2001-11-01', '2000-09-14 19:44:03'),
+    (5762, 8501, 1818, 'BLACKLISTED_BENEFICIARY', 'CRITICAL', 66.24, 'ESCALATED', 'dseqm', 'qjjepxhcxjjftsjrp', '2004-02-20', '2001-12-25 23:52:47'),
+    (2475, 7189, 6117, 'VELOCITY_BREACH', 'MEDIUM', 78.32, 'FALSE_POSITIVE', 'treprfc', 'tssvhtapzxwopgrwvd', '2018-06-04', '2005-06-16 00:49:17'),
+    (7961, 8402, 3409, 'VELOCITY_BREACH', 'HIGH', 2.61, 'UNDER_REVIEW', 'naxsdwmvcidskh', 'atumk', '2024-11-21', '2015-01-20 04:47:46'),
+    (2838, 7710, 9179, 'UNUSUAL_LOCATION', 'LOW', 40.44, 'CLOSED', 'wxqsrrhvwpwpvwqhm', 'tjrfe', '2004-06-20', '2009-06-10 20:50:12'),
+    (1133, 1885, 4278, 'RAPID_SUCCESSION', 'LOW', 39.2, 'OPEN', 'krmzlzf', 'joknofrgjwsurb', '2008-10-29', '2024-11-26 09:37:02'),
+    (9140, 2338, 6988, 'BLACKLISTED_BENEFICIARY', 'CRITICAL', 27.86, 'UNDER_REVIEW', 'orcmmeziiymroiwo', 'aimngkgtapsqyrer', '2020-06-22', '2004-08-04 08:41:30'),
+    (6908, 8136, 5978, 'HIGH_VALUE', 'LOW', 8.58, 'CLOSED', 'kgitvfbsmvxedoatq', 'vbhieb', '2012-07-14', '2009-10-22 17:42:21'),
+    (8821, 6245, 1818, 'VELOCITY_BREACH', 'CRITICAL', 39.39, 'ESCALATED', 'jbyzsuvkymrwx', 'ifhsdahiz', '2001-10-09', '2024-03-11 03:56:38'),
+    (2031, 8136, 4965, 'BLACKLISTED_BENEFICIARY', 'HIGH', 12.27, 'FALSE_POSITIVE', 'hchuobh', 'azxfrjewmchwppzxv', '2003-09-12', '2018-05-15 04:07:39'),
+    (4709, 1653, 4990, 'BLACKLISTED_BENEFICIARY', 'LOW', 54.7, 'OPEN', 'oqjpxdkfcohxsz', 'ujcgftlnn', '2013-06-28', '2009-11-08 12:21:28'),
+    (7993, 1885, 5428, 'UNUSUAL_LOCATION', 'HIGH', 52.06, 'CLOSED', 'xxleuadddtw', 'kwqjo', '2003-12-24', '2012-01-30 17:50:42'),
+    (6373, 7189, 3366, 'BLACKLISTED_BENEFICIARY', 'MEDIUM', 2.03, 'ESCALATED', 'gscgoihmvyjvavp', 'plspnapcns', '2001-07-12', '2017-09-16 10:30:23'),
+    (2429, 1638, 5428, 'BLACKLISTED_BENEFICIARY', 'HIGH', 12.57, 'UNDER_REVIEW', 'zqstrmhiwbnhcrxoy', 'gkmmanvpgaulgdhjiv', '2022-10-28', '2001-10-19 00:35:11'),
+    (8040, 1885, 8367, 'HIGH_VALUE', 'MEDIUM', 85.73, 'CLOSED', 'tjvewrvxc', 'unzpuh', '2021-02-01', '2002-02-17 14:30:37'),
+    (4437, 1638, 1818, 'UNUSUAL_LOCATION', 'MEDIUM', 15.93, 'ESCALATED', 'wztpjpxhqufrazoyo', 'nvbxgsgruw', '2006-03-23', '2009-02-26 17:53:56'),
+    (4950, 2297, 354, 'BLACKLISTED_BENEFICIARY', 'LOW', 99.84, 'ESCALATED', 'hzfrwlb', 'wjztonynj', '2013-10-07', '2009-05-07 21:04:13'),
+    (3900, 6245, 8271, 'RAPID_SUCCESSION', 'MEDIUM', 83.17, 'CLOSED', 'buonfonmfg', 'zwhhdaamauci', '2005-06-14', '2018-07-16 11:26:07'),
+    (2524, 5481, 1818, 'UNUSUAL_LOCATION', 'LOW', 94.07, 'CLOSED', 'urisopcuqpkghgrgf', 'mthnuksztqlsahoduk', '2025-11-26', '2001-10-02 01:11:47');

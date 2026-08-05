@@ -1,15 +1,56 @@
 {
-  "columns": [
-    { "name": "id",          "type": "serial" },
-    { "name": "full_name",   "type": "varchar", "length": 100 },
-    { "name": "email",       "type": "varchar", "length": 150 },
-    { "name": "phone",       "type": "varchar", "length": 20  },
-    { "name": "address",     "type": "text" },
-    { "name": "age",         "type": "integer", "min": 18, "max": 80 },
-    { "name": "salary",      "type": "decimal", "min": 30000, "max": 150000 },
-    { "name": "is_active",   "type": "boolean" },
-    { "name": "created_at",  "type": "timestamp" },
-    { "name": "birth_date",  "type": "date" },
-    { "name": "user_uuid",   "type": "uuid" }
+  "tables": [
+    {
+      "name": "customers",
+      "columns": [
+        { "name": "customer_id", "type": "serial" },
+        { "name": "full_name",   "type": "varchar", "length": 100 },
+        { "name": "email",       "type": "varchar", "length": 150 },
+        { "name": "phone",       "type": "varchar", "length": 20  },
+        { "name": "address",     "type": "text" },
+        { "name": "is_active",   "type": "boolean" },
+        { "name": "created_at",  "type": "timestamp" }
+      ],
+      "foreign_keys": []
+    },
+    {
+      "name": "products",
+      "columns": [
+        { "name": "product_id",  "type": "serial" },
+        { "name": "sku",         "type": "varchar", "length": 50  },
+        { "name": "name",        "type": "varchar", "length": 200 },
+        { "name": "price",       "type": "decimal", "min": 1, "max": 999 },
+        { "name": "stock",       "type": "integer", "min": 0, "max": 500 },
+        { "name": "created_at",  "type": "timestamp" }
+      ],
+      "foreign_keys": []
+    },
+    {
+      "name": "orders",
+      "columns": [
+        { "name": "order_id",    "type": "serial" },
+        { "name": "customer_id", "type": "integer" },
+        { "name": "order_date",  "type": "date" },
+        { "name": "status",      "type": "varchar", "length": 20 },
+        { "name": "total",       "type": "decimal", "min": 10, "max": 5000 }
+      ],
+      "foreign_keys": [
+        { "column": "customer_id", "ref_table": "customers", "ref_column": "customer_id" }
+      ]
+    },
+    {
+      "name": "order_items",
+      "columns": [
+        { "name": "item_id",    "type": "serial" },
+        { "name": "order_id",   "type": "integer" },
+        { "name": "product_id", "type": "integer" },
+        { "name": "quantity",   "type": "integer", "min": 1, "max": 20 },
+        { "name": "unit_price", "type": "decimal", "min": 1, "max": 999 }
+      ],
+      "foreign_keys": [
+        { "column": "order_id",   "ref_table": "orders",   "ref_column": "order_id"   },
+        { "column": "product_id", "ref_table": "products", "ref_column": "product_id" }
+      ]
+    }
   ]
 }
