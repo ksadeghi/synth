@@ -415,9 +415,17 @@ def generate_row(columns: list, fk_map: dict, generated: dict,
         samples = col.get("samples")
         if samples:
             entry = random.choice(samples)
-            if _is_pattern(entry):
+            if _is_variable(entry):
+                # Single token: {first_name}
+                row.append(resolve_variable(entry))
+            elif _is_template(entry):
+                # Inline template: {first_name} {last_name}, {first_name}.{last_name}@co.com, etc.
+                row.append(expand_template(entry))
+            elif _is_pattern(entry):
+                # Regex pattern: ORD-[A-Z]{2}[0-9]{4}
                 row.append(rand_from_pattern(entry))
             else:
+                # Plain literal: Alice
                 row.append(coerce_sample(entry, col))
             continue
 
@@ -609,14 +617,202 @@ def error_response(status, message):
 
 # ── Synthetic data generators ─────────────────────────────────────────────────
 
-FIRST_NAMES = ["Alice", "Bob", "Carol", "David", "Eva", "Frank", "Grace", "Henry",
-               "Iris", "Jack", "Karen", "Leo", "Maria", "Nathan", "Olivia", "Paul"]
-LAST_NAMES  = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller",
-               "Davis", "Wilson", "Moore", "Taylor", "Anderson", "Thomas", "Jackson"]
-DOMAINS     = ["example.com", "mail.com", "test.org", "sample.net", "demo.io"]
-STREETS     = ["Main St", "Oak Ave", "Maple Dr", "Cedar Ln", "Pine Rd", "Elm Blvd"]
-CITIES      = ["Springfield", "Shelbyville", "Capital City", "Ogdenville", "Brockway"]
-STATES      = ["CA", "TX", "NY", "FL", "IL", "PA", "OH", "GA", "NC", "MI"]
+# ---------------------------------------------------------------------------
+# Real-world name data (sourced from US SSA top-200 baby names 2020-2025,
+# and widely published global surname frequency lists — all public domain).
+# ---------------------------------------------------------------------------
+NAMES_DATA = {
+    "first_male": [
+        "Liam","Noah","Oliver","James","Elijah","William","Henry","Lucas","Theodore","Benjamin",
+        "Mateo","Jack","Owen","Ethan","Aiden","Sebastian","Muhammad","Jackson","Mason","Asher",
+        "Leo","Julian","Levi","Daniel","Michael","Logan","Alexander","Samuel","Ezra","Hudson",
+        "Nathan","Gabriel","David","Ryan","Caleb","Anthony","Isaac","Christopher","Andrew","Joshua",
+        "Lincoln","Cameron","Eli","Adrian","Nolan","Jaxon","Grayson","Santiago","Kai","Connor",
+        "Dylan","Aaron","Charles","Dominic","Evan","Isaiah","Thomas","Jordan","Robert","Nicholas",
+        "Wyatt","Hunter","Adam","Jason","Tyler","Jose","Kevin","Luke","Brian","Carter",
+        "Austin","Landon","Gavin","Jonathan","Brayden","Colton","Carlos","Angel","Ayden","Cooper",
+        "Lincoln","Miles","Josiah","Maxwell","Xavier","Jace","Ian","Bryson","Ryder","Harrison",
+        "Parker","Vincent","Marcus","Cole","Easton","Nathaniel","Roman","Maverick","Sawyer","Damien",
+    ],
+    "first_female": [
+        "Olivia","Emma","Charlotte","Amelia","Sophia","Mia","Isabella","Ava","Evelyn","Harper",
+        "Luna","Camila","Sofia","Eleanor","Elizabeth","Violet","Scarlett","Emily","Hazel","Lily",
+        "Gianna","Aurora","Penelope","Riley","Zoey","Nora","Lillian","Addison","Aubrey","Ellie",
+        "Stella","Natalie","Zoe","Leah","Hannah","Layla","Brooklyn","Sofia","Anna","Victoria",
+        "Isla","Grace","Maya","Chloe","Elena","Aria","Paisley","Savannah","Audrey","Claire",
+        "Skylar","Lucy","Bella","Valentina","Nova","Genesis","Emilia","Willow","Samantha","Ruby",
+        "Kinsley","Hailey","Eva","Madelyn","Delilah","Autumn","Alyssa","Naomi","Melanie","Serenity",
+        "Abigail","Gabriella","Jade","Lydia","Aaliyah","Maria","Sophie","Reagan","Peyton","Alice",
+        "Ariana","Eliana","Taylor","Isabelle","Caroline","Brooklyn","Quinn","Morgan","Kennedy","Vivian",
+        "Mackenzie","Jasmine","Josephine","Faith","Alexandra","Ashley","Madison","Amber","Katherine","Diana",
+    ],
+    "last": [
+        # English / American
+        "Smith","Johnson","Williams","Brown","Jones","Garcia","Miller","Davis","Wilson","Moore",
+        "Taylor","Anderson","Thomas","Jackson","White","Harris","Martin","Thompson","Young","Walker",
+        "Hall","Allen","Wright","Scott","Torres","Nguyen","Hill","Flores","Green","Adams",
+        "Nelson","Baker","Carter","Mitchell","Perez","Roberts","Turner","Phillips","Campbell","Parker",
+        "Evans","Edwards","Collins","Stewart","Sanchez","Morris","Rogers","Reed","Cook","Morgan",
+        "Bell","Murphy","Bailey","Rivera","Cooper","Richardson","Cox","Howard","Ward","Peterson",
+        "Gray","Ramirez","James","Watson","Brooks","Kelly","Sanders","Price","Bennett","Wood",
+        "Barnes","Ross","Henderson","Coleman","Jenkins","Perry","Powell","Long","Patterson","Hughes",
+        # European
+        "Mueller","Schmidt","Schneider","Fischer","Weber","Meyer","Wagner","Becker","Schulz","Hoffmann",
+        "Dupont","Leroy","Moreau","Laurent","Simon","Bernard","Martin","Robert","Richard","Petit",
+        "Rossi","Ferrari","Esposito","Russo","Bianchi","Romano","Colombo","Ricci","Marino","Greco",
+        "Garcia","Martinez","Lopez","Sanchez","Gonzalez","Rodriguez","Fernandez","Diaz","Torres","Ruiz",
+        # Asian
+        "Wang","Li","Zhang","Liu","Chen","Yang","Huang","Zhao","Wu","Zhou",
+        "Kim","Lee","Park","Choi","Jeong","Kang","Cho","Yoon","Lim","Ha",
+        "Tanaka","Sato","Suzuki","Watanabe","Ito","Yamamoto","Nakamura","Kobayashi","Kato","Abe",
+        "Singh","Kumar","Sharma","Patel","Gupta","Verma","Shah","Mehta","Joshi","Nair",
+        # Other
+        "Silva","Santos","Oliveira","Souza","Pereira","Costa","Alves","Nascimento","Lima","Carvalho",
+        "Ali","Hassan","Mohamed","Ahmed","Omar","Khan","Malik","Siddiqui","Chaudhry","Sheikh",
+        "Okafor","Eze","Nwosu","Adeyemi","Abubakar","Musa","Ibrahim","Mohammed","Diallo","Traore",
+    ],
+    "email_domains": [
+        "gmail.com","yahoo.com","outlook.com","hotmail.com","icloud.com",
+        "mail.com","protonmail.com","aol.com","live.com","msn.com",
+    ],
+    "cities": [
+        "New York","Los Angeles","Chicago","Houston","Phoenix","Philadelphia","San Antonio","San Diego",
+        "Dallas","San Jose","Austin","Jacksonville","Fort Worth","Columbus","Charlotte","Indianapolis",
+        "London","Manchester","Birmingham","Glasgow","Liverpool","Leeds","Edinburgh","Bristol",
+        "Toronto","Montreal","Vancouver","Calgary","Ottawa","Edmonton",
+        "Sydney","Melbourne","Brisbane","Perth","Adelaide",
+        "Berlin","Hamburg","Munich","Frankfurt","Cologne","Stuttgart",
+        "Paris","Marseille","Lyon","Toulouse","Nice","Nantes",
+        "Tokyo","Osaka","Yokohama","Nagoya","Sapporo",
+        "Mumbai","Delhi","Bangalore","Chennai","Hyderabad","Kolkata",
+        "Shanghai","Beijing","Shenzhen","Guangzhou","Chengdu",
+        "Dubai","Abu Dhabi","Riyadh","Jeddah","Kuwait City",
+        "Singapore","Kuala Lumpur","Bangkok","Jakarta","Manila",
+        "São Paulo","Rio de Janeiro","Buenos Aires","Bogotá","Lima","Santiago",
+        "Lagos","Nairobi","Johannesburg","Cairo","Casablanca","Accra",
+    ],
+    "countries": [
+        "United States","United Kingdom","Canada","Australia","Germany","France","Italy","Spain",
+        "Netherlands","Sweden","Norway","Denmark","Switzerland","Belgium","Austria","Portugal",
+        "Japan","South Korea","China","India","Singapore","UAE","Saudi Arabia","Israel",
+        "Brazil","Mexico","Argentina","Colombia","Chile","Peru",
+        "South Africa","Nigeria","Kenya","Egypt","Morocco","Ghana",
+        "New Zealand","Ireland","Finland","Poland","Czech Republic","Hungary","Romania",
+    ],
+    "companies": [
+        "Acme Corp","Globex","Initech","Hooli","Pied Piper","Dunder Mifflin","Vandelay Industries",
+        "Sterling Cooper","Bluth Company","Prestige Worldwide","Oceanic Airlines","Massive Dynamic",
+        "Apex Technologies","Blue Horizon","Nexus Partners","Catalyst Group","Summit Solutions",
+        "Vertex Systems","Pinnacle Ventures","Meridian Capital","Cobalt Digital","Argon Analytics",
+        "Helix Biotech","Solaris Energy","Quantum Dynamics","Vortex Media","Stratos Finance",
+        "Luminary Health","Atlas Consulting","Orion Logistics","Eclipse Software","Nova Retail",
+        "Titan Manufacturing","Onyx Security","Ember Creative","Prism Data","Aegis Insurance",
+        "Beacon Pharma","Cirrus Cloud","Denali Partners","Frontier Networks","Glacier Capital",
+    ],
+    "job_titles": [
+        "Software Engineer","Senior Software Engineer","Staff Engineer","Principal Engineer",
+        "Product Manager","Senior Product Manager","Director of Product","VP of Product",
+        "Data Analyst","Data Scientist","Senior Data Scientist","ML Engineer",
+        "DevOps Engineer","Site Reliability Engineer","Cloud Architect","Security Engineer",
+        "UX Designer","UI Designer","Design Lead","Creative Director",
+        "Marketing Manager","Growth Manager","Content Strategist","Brand Manager",
+        "Sales Executive","Account Manager","Business Development Manager","Sales Director",
+        "Financial Analyst","Senior Analyst","Finance Manager","CFO","Controller",
+        "HR Manager","Talent Acquisition Specialist","People Operations Manager","CHRO",
+        "Operations Manager","Project Manager","Program Manager","COO",
+        "Customer Success Manager","Support Engineer","Technical Account Manager",
+        "QA Engineer","Test Lead","Automation Engineer",
+        "CEO","CTO","CIO","VP Engineering","VP Sales","VP Marketing",
+    ],
+    "streets": [
+        "Main St","Oak Ave","Maple Dr","Cedar Ln","Pine Rd","Elm Blvd","Park Ave",
+        "Washington Blvd","Lake Shore Dr","River Rd","Highland Ave","Sunset Blvd",
+        "Willow Way","Birch Ct","Spruce St","Chestnut St","Walnut Ave","Magnolia Dr",
+    ],
+    "states": [
+        "CA","TX","NY","FL","IL","PA","OH","GA","NC","MI",
+        "WA","AZ","CO","TN","IN","MO","MD","WI","MN","SC",
+    ],
+}
+
+# ── Variable substitution ──────────────────────────────────────────────────────
+# Supported tokens: {first_name}, {last_name}, {full_name}, {male_name},
+#   {female_name}, {email}, {username}, {city}, {country}, {company}, {job_title}
+
+_VAR_RE      = re.compile(r'^\{([a-zA-Z]\w*)\}$')            # exactly one variable, nothing else
+_TEMPLATE_RE = re.compile(r'\{([a-zA-Z]\w*)\}')              # {var} — must start with a letter (not a digit quantifier)
+
+
+def _is_variable(s: str) -> bool:
+    """True when the entire string is a single {variable} token."""
+    return bool(_VAR_RE.match(s.strip()))
+
+
+def _is_template(s: str) -> bool:
+    """True when the string contains at least one {variable} placeholder."""
+    return bool(_TEMPLATE_RE.search(s.strip()))
+
+
+def expand_template(template: str) -> str:
+    """
+    Replace every {variable} placeholder in *template* with a resolved value.
+    Unrecognised placeholders are left unchanged.
+    Examples:
+      '{first_name} {last_name}'  -> 'Olivia Garcia'
+      '{first_name}.{last_name}@company.com' -> 'noah.patel@company.com'
+      'EMP-{first_name}-[0-9]{4}' -> not a template call (contains regex too)
+    """
+    def _replace(m):
+        token = '{' + m.group(1) + '}'
+        return resolve_variable(token)
+    return _TEMPLATE_RE.sub(_replace, template)
+
+
+def resolve_variable(token: str) -> str:
+    """Expand a {variable} token to a random real-world value."""
+    key = _VAR_RE.match(token.strip()).group(1).lower()
+
+    first_m  = lambda: random.choice(NAMES_DATA["first_male"])
+    first_f  = lambda: random.choice(NAMES_DATA["first_female"])
+    first_   = lambda: random.choice(NAMES_DATA["first_male"] + NAMES_DATA["first_female"])
+    last_    = lambda: random.choice(NAMES_DATA["last"])
+
+    if key in ("first_name", "firstname", "given_name"):
+        return first_()
+    if key in ("male_name", "male_first_name", "first_name_male"):
+        return first_m()
+    if key in ("female_name", "female_first_name", "first_name_female"):
+        return first_f()
+    if key in ("last_name", "lastname", "surname", "family_name"):
+        return last_()
+    if key in ("full_name", "fullname", "name"):
+        return f"{first_()} {last_()}"
+    if key in ("email", "email_address"):
+        fn = first_().lower()
+        ln = last_().lower().replace(" ", "")
+        sep = random.choice([".", "_", ""])
+        sfx = str(random.randint(1, 999)) if random.random() < 0.3 else ""
+        dom = random.choice(NAMES_DATA["email_domains"])
+        return f"{fn}{sep}{ln}{sfx}@{dom}"
+    if key in ("username", "user_name", "login", "handle"):
+        fn = first_().lower()
+        ln = last_().lower().replace(" ", "")
+        return f"{fn}{ln}{random.randint(1, 999)}"
+    if key in ("city", "city_name"):
+        return random.choice(NAMES_DATA["cities"])
+    if key in ("country", "country_name"):
+        return random.choice(NAMES_DATA["countries"])
+    if key in ("company", "company_name", "employer", "organization"):
+        return random.choice(NAMES_DATA["companies"])
+    if key in ("job_title", "jobtitle", "title", "position", "role", "occupation"):
+        return random.choice(NAMES_DATA["job_titles"])
+    if key in ("street", "street_address"):
+        return f"{random.randint(1, 9999)} {random.choice(NAMES_DATA['streets'])}"
+    if key in ("state", "state_code"):
+        return random.choice(NAMES_DATA["states"])
+
+    # Unknown variable — return the token unchanged so it's visible
+    return token
 
 
 def rand_string(length=8):
@@ -648,11 +844,16 @@ def rand_bool(_col):
 
 
 def rand_email(_col):
-    return f"{random.choice(FIRST_NAMES).lower()}.{random.choice(LAST_NAMES).lower()}@{random.choice(DOMAINS)}"
+    fn  = random.choice(NAMES_DATA["first_male"] + NAMES_DATA["first_female"]).lower()
+    ln  = random.choice(NAMES_DATA["last"]).lower().replace(" ", "")
+    dom = random.choice(NAMES_DATA["email_domains"])
+    return f"{fn}.{ln}@{dom}"
 
 
 def rand_name(_col):
-    return f"{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}"
+    first = random.choice(NAMES_DATA["first_male"] + NAMES_DATA["first_female"])
+    last  = random.choice(NAMES_DATA["last"])
+    return f"{first} {last}"
 
 
 def rand_phone(_col):
@@ -660,7 +861,10 @@ def rand_phone(_col):
 
 
 def rand_address(_col):
-    return f"{random.randint(1,9999)} {random.choice(STREETS)}, {random.choice(CITIES)}, {random.choice(STATES)}"
+    street = f"{random.randint(1,9999)} {random.choice(NAMES_DATA['streets'])}"
+    city   = random.choice(NAMES_DATA["cities"])
+    state  = random.choice(NAMES_DATA["states"])
+    return f"{street}, {city}, {state}"
 
 
 def rand_uuid(_col):

@@ -1,46 +1,105 @@
 HTML_CONTENT = r"""<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Synthetic Data Generator</title>
   <style>
+    /* ── Theme tokens ─────────────────────────────────────────────────────── */
+    html[data-theme="dark"] {
+      --bg:              #0f172a;   --bg-card:    #1e293b;
+      --bg-input:        #0f172a;   --bg-thead:   #0f172a;
+      --bg-row-hover:    #1e293b;   --bg-collapse:#0f172a;
+      --bg-collapse-hov: #1a2540;   --bg-schema-row-hov: #1a2540;
+      --border:          #334155;   --border-input:#475569;
+      --text:            #e2e8f0;   --text-h1:   #f8fafc;
+      --text-h2:         #cbd5e1;   --text-muted:#94a3b8;
+      --text-dim:        #64748b;   --text-faint:#475569;
+      --col-name:        #93c5fd;
+      --fk-bg:#1e3a5f; --fk-border:#2563eb; --fk-color:#93c5fd;
+      --badge-bg:#1e3a5f; --badge-border:#2563eb; --badge-color:#93c5fd;
+      --badge-root-bg:#1a3a2a; --badge-root-border:#16a34a; --badge-root-color:#86efac;
+      --alert-err-bg:#450a0a; --alert-err-border:#b91c1c; --alert-err-text:#fca5a5;
+      --alert-ok-bg:#052e16;  --alert-ok-border:#15803d;  --alert-ok-text:#86efac;
+      --toggle-track:#334155; --toggle-thumb:#94a3b8;
+    }
+    html[data-theme="light"] {
+      --bg:              #f1f5f9;   --bg-card:    #ffffff;
+      --bg-input:        #f8fafc;   --bg-thead:   #f1f5f9;
+      --bg-row-hover:    #f1f5f9;   --bg-collapse:#f1f5f9;
+      --bg-collapse-hov: #e2e8f0;   --bg-schema-row-hov: #f8fafc;
+      --border:          #cbd5e1;   --border-input:#94a3b8;
+      --text:            #1e293b;   --text-h1:   #0f172a;
+      --text-h2:         #1e293b;   --text-muted:#475569;
+      --text-dim:        #64748b;   --text-faint:#94a3b8;
+      --col-name:        #2563eb;
+      --fk-bg:#dbeafe; --fk-border:#3b82f6; --fk-color:#1d4ed8;
+      --badge-bg:#dbeafe; --badge-border:#3b82f6; --badge-color:#1d4ed8;
+      --badge-root-bg:#dcfce7; --badge-root-border:#16a34a; --badge-root-color:#15803d;
+      --alert-err-bg:#fef2f2; --alert-err-border:#fca5a5; --alert-err-text:#b91c1c;
+      --alert-ok-bg:#f0fdf4;  --alert-ok-border:#86efac;  --alert-ok-text:#15803d;
+      --toggle-track:#6366f1; --toggle-thumb:#ffffff;
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       padding: 2rem;
+      transition: background 0.2s, color 0.2s;
     }
 
-    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; color: #f8fafc; }
-    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 0.95rem; }
+    /* ── Page header ── */
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;
+    }
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text-h1); }
+    .subtitle { color: var(--text-muted); font-size: 0.95rem; }
+
+    /* ── Theme toggle ── */
+    .theme-toggle {
+      display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;
+      font-size: 0.82rem; color: var(--text-dim);
+      cursor: pointer; user-select: none; padding-top: 0.25rem;
+    }
+    .toggle-track {
+      position: relative; width: 40px; height: 22px; border-radius: 999px;
+      background: var(--toggle-track); transition: background 0.2s; flex-shrink: 0;
+    }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--toggle-thumb); transition: transform 0.2s;
+    }
+    html[data-theme="light"] .toggle-thumb { transform: translateX(18px); }
 
     .card {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: 0.75rem;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
+      transition: background 0.2s, border-color 0.2s;
     }
-    .card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #cbd5e1; }
+    .card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-h2); }
 
     /* ── Form controls ── */
     .form-row { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
     .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-    .form-group label { font-size: 0.85rem; color: #94a3b8; }
+    .form-group label { font-size: 0.85rem; color: var(--text-muted); }
 
     input[type="number"], input[type="file"] {
-      background: #0f172a;
-      border: 1px solid #475569;
+      background: var(--bg-input);
+      border: 1px solid var(--border-input);
       border-radius: 0.5rem;
-      color: #e2e8f0;
+      color: var(--text);
       padding: 0.55rem 0.85rem;
       font-size: 0.9rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, background 0.2s;
     }
     input[type="number"] { width: 140px; }
     input[type="number"]:focus, input[type="file"]:focus { border-color: #6366f1; }
@@ -67,8 +126,8 @@ HTML_CONTENT = r"""<!DOCTYPE html>
     /* ── Alerts ── */
     .alert { padding: 0.75rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; margin-bottom: 1rem; display: none; }
     .alert.show { display: block; }
-    .alert-error   { background: #450a0a; border: 1px solid #b91c1c; color: #fca5a5; }
-    .alert-success { background: #052e16; border: 1px solid #15803d; color: #86efac; }
+    .alert-error   { background: var(--alert-err-bg); border: 1px solid var(--alert-err-border); color: var(--alert-err-text); }
+    .alert-success { background: var(--alert-ok-bg);  border: 1px solid var(--alert-ok-border);  color: var(--alert-ok-text); }
 
     /* ── Spinner ── */
     .spinner { display: none; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
@@ -76,18 +135,18 @@ HTML_CONTENT = r"""<!DOCTYPE html>
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ── Tabs ── */
-    .tabs { display: flex; gap: 0; border-bottom: 1px solid #334155; margin-bottom: 1rem; flex-wrap: wrap; }
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1rem; flex-wrap: wrap; }
     .tab-btn {
       padding: 0.5rem 1.1rem;
       background: none; border: none;
-      color: #64748b; font-size: 0.85rem; font-weight: 500;
+      color: var(--text-dim); font-size: 0.85rem; font-weight: 500;
       cursor: pointer;
       border-bottom: 2px solid transparent;
       margin-bottom: -1px;
       transition: color 0.15s, border-color 0.15s;
       white-space: nowrap;
     }
-    .tab-btn:hover { color: #cbd5e1; }
+    .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: #6366f1; border-bottom-color: #6366f1; }
 
     .tab-panel { display: none; }
@@ -98,45 +157,43 @@ HTML_CONTENT = r"""<!DOCTYPE html>
     .schema-preview.show { display: block; }
 
     .hint {
-      font-size: 0.82rem; color: #64748b; margin-bottom: 0.75rem; line-height: 1.6;
+      font-size: 0.82rem; color: var(--text-dim); margin-bottom: 0.75rem; line-height: 1.6;
     }
     .hint code {
-      color: #93c5fd; background: #0f172a;
+      color: var(--col-name); background: var(--bg-input);
       padding: 0.1rem 0.35rem; border-radius: 0.25rem;
     }
 
-    .schema-tbl-wrap { overflow-x: auto; border-radius: 0.5rem; border: 1px solid #334155; }
+    .schema-tbl-wrap { overflow-x: auto; border-radius: 0.5rem; border: 1px solid var(--border); }
     .schema-tbl { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
-    .schema-tbl thead { background: #0f172a; }
+    .schema-tbl thead { background: var(--bg-thead); }
     .schema-tbl thead th {
       padding: 0.5rem 0.9rem; text-align: left;
-      font-weight: 600; color: #64748b;
-      border-bottom: 1px solid #334155; white-space: nowrap;
+      font-weight: 600; color: var(--text-dim);
+      border-bottom: 1px solid var(--border); white-space: nowrap;
     }
-    .schema-tbl tbody tr { border-bottom: 1px solid #1e293b; }
+    .schema-tbl tbody tr { border-bottom: 1px solid var(--border); }
     .schema-tbl tbody tr:last-child { border-bottom: none; }
-    .schema-tbl tbody tr:hover { background: #1a2540; }
+    .schema-tbl tbody tr:hover { background: var(--bg-schema-row-hov); }
     .schema-tbl tbody td { padding: 0.45rem 0.9rem; vertical-align: middle; }
 
-    .col-name { font-weight: 600; color: #93c5fd; font-family: monospace; }
-    .col-type { color: #94a3b8; font-family: monospace; font-size: 0.78rem; }
+    .col-name { font-weight: 600; color: var(--col-name); font-family: monospace; }
+    .col-type { color: var(--text-muted); font-family: monospace; font-size: 0.78rem; }
     .fk-badge {
       display: inline-block;
       font-size: 0.7rem; font-weight: 600;
-      background: #1e3a5f; border: 1px solid #2563eb;
-      color: #93c5fd; border-radius: 0.25rem;
-      padding: 0.1rem 0.4rem; margin-left: 0.4rem;
-      white-space: nowrap;
+      background: var(--fk-bg); border: 1px solid var(--fk-border); color: var(--fk-color);
+      border-radius: 0.25rem; padding: 0.1rem 0.4rem; margin-left: 0.4rem; white-space: nowrap;
     }
 
     .samples-input {
       width: 100%; min-width: 200px;
-      background: #0f172a; border: 1px solid #334155; border-radius: 0.4rem;
-      color: #e2e8f0; padding: 0.4rem 0.7rem; font-size: 0.82rem;
+      background: var(--bg-input); border: 1px solid var(--border); border-radius: 0.4rem;
+      color: var(--text); padding: 0.4rem 0.7rem; font-size: 0.82rem;
       outline: none; transition: border-color 0.2s;
     }
     .samples-input:focus { border-color: #6366f1; }
-    .samples-input::placeholder { color: #475569; }
+    .samples-input::placeholder { color: var(--text-faint); }
     .samples-input:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── Results ── */
@@ -147,84 +204,70 @@ HTML_CONTENT = r"""<!DOCTYPE html>
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
     }
-    .results-meta { font-size: 0.85rem; color: #64748b; }
+    .results-meta { font-size: 0.85rem; color: var(--text-dim); }
 
-    .data-tbl-wrap { overflow-x: auto; border-radius: 0.5rem; border: 1px solid #334155; max-height: 420px; overflow-y: auto; }
+    .data-tbl-wrap { overflow-x: auto; border-radius: 0.5rem; border: 1px solid var(--border); max-height: 420px; overflow-y: auto; }
     .data-tbl { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    .data-tbl thead { background: #0f172a; position: sticky; top: 0; z-index: 1; }
+    .data-tbl thead { background: var(--bg-thead); position: sticky; top: 0; z-index: 1; }
     .data-tbl thead th {
       padding: 0.65rem 1rem; text-align: left;
-      font-weight: 600; color: #94a3b8;
-      border-bottom: 1px solid #334155; white-space: nowrap;
+      font-weight: 600; color: var(--text-muted);
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+      cursor: pointer;
     }
-    .data-tbl tbody tr { border-bottom: 1px solid #1e293b; transition: background 0.1s; }
+    .data-tbl thead th:hover { color: var(--text); }
+    .data-tbl tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
     .data-tbl tbody tr:last-child { border-bottom: none; }
-    .data-tbl tbody tr:hover { background: #1e293b; }
+    .data-tbl tbody tr:hover { background: var(--bg-row-hover); }
     .data-tbl tbody td {
-      padding: 0.55rem 1rem; color: #e2e8f0;
+      padding: 0.55rem 1rem; color: var(--text);
       max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
-    .empty-state { text-align: center; padding: 3rem; color: #475569; }
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-faint); }
 
     /* ── Row-count preview badges ── */
     .count-badge {
-      display: inline-block;
-      font-size: 0.72rem; font-weight: 600;
-      background: #1e3a5f; border: 1px solid #2563eb;
-      color: #93c5fd; border-radius: 0.9rem;
-      padding: 0.1rem 0.55rem; margin-left: 0.45rem;
+      display: inline-block; font-size: 0.72rem; font-weight: 600;
+      background: var(--badge-bg); border: 1px solid var(--badge-border); color: var(--badge-color);
+      border-radius: 0.9rem; padding: 0.1rem 0.55rem; margin-left: 0.45rem;
       white-space: nowrap; vertical-align: middle;
     }
-    .count-badge.root { background: #1a3a2a; border-color: #16a34a; color: #86efac; }
-
-    .fanout-hint {
-      margin-top: 0.6rem;
-      font-size: 0.8rem; color: #64748b; line-height: 1.5;
+    .count-badge.root {
+      background: var(--badge-root-bg); border-color: var(--badge-root-border); color: var(--badge-root-color);
     }
+
+    .fanout-hint { margin-top: 0.6rem; font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
 
     /* ── Collapsible schema preview ── */
     .collapse-toggle {
       display: flex; align-items: center; justify-content: space-between;
       cursor: pointer; user-select: none;
       margin-top: 1rem; padding: 0.5rem 0.75rem;
-      background: #0f172a; border: 1px solid #334155; border-radius: 0.5rem;
-      font-size: 0.85rem; font-weight: 600; color: #94a3b8;
+      background: var(--bg-collapse); border: 1px solid var(--border); border-radius: 0.5rem;
+      font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
       transition: background 0.15s;
     }
-    .collapse-toggle:hover { background: #1a2540; color: #e2e8f0; }
-    .collapse-toggle .arrow {
-      font-size: 0.75rem; transition: transform 0.2s;
-      display: inline-block;
-    }
+    .collapse-toggle:hover { background: var(--bg-collapse-hov); color: var(--text); }
+    .collapse-toggle .arrow { font-size: 0.75rem; transition: transform 0.2s; display: inline-block; }
     .collapse-toggle.open .arrow { transform: rotate(180deg); }
     .collapse-body { overflow: hidden; }
     .collapse-body.hidden { display: none; }
 
     /* ── Search bar ── */
-    .search-row {
-      display: flex; align-items: center; gap: 0.6rem;
-      margin-bottom: 0.75rem;
-    }
+    .search-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; }
     .search-input {
-      flex: 1;
-      background: #0f172a; border: 1px solid #334155; border-radius: 0.4rem;
-      color: #e2e8f0; padding: 0.4rem 0.75rem; font-size: 0.83rem;
+      flex: 1; background: var(--bg-input); border: 1px solid var(--border); border-radius: 0.4rem;
+      color: var(--text); padding: 0.4rem 0.75rem; font-size: 0.83rem;
       outline: none; transition: border-color 0.2s;
     }
     .search-input:focus { border-color: #6366f1; }
-    .search-input::placeholder { color: #475569; }
-    .search-count { font-size: 0.78rem; color: #64748b; white-space: nowrap; }
+    .search-input::placeholder { color: var(--text-faint); }
+    .search-count { font-size: 0.78rem; color: var(--text-dim); white-space: nowrap; }
 
     /* ── Sortable column headers ── */
-    .data-tbl thead th {
-      cursor: pointer;
-    }
-    .data-tbl thead th:hover { color: #e2e8f0; }
     .data-tbl thead th .sort-arrow {
-      display: inline-block; margin-left: 0.3rem;
-      font-size: 0.65rem; opacity: 0.35;
-      transition: opacity 0.15s;
+      display: inline-block; margin-left: 0.3rem; font-size: 0.65rem; opacity: 0.35; transition: opacity 0.15s;
     }
     .data-tbl thead th.sort-asc  .sort-arrow,
     .data-tbl thead th.sort-desc .sort-arrow { opacity: 1; color: #6366f1; }
@@ -235,8 +278,18 @@ HTML_CONTENT = r"""<!DOCTYPE html>
 </head>
 <body>
 
-<h1>&#9889; Synthetic Data Generator</h1>
-<p class="subtitle">Upload a schema with one or more tables, configure sample seeds, and generate referentially consistent synthetic data.</p>
+<!-- ── Page header ───────────────────────────────────────────────────────── -->
+<div class="page-header">
+  <div>
+    <h1>&#9889; Synthetic Data Generator</h1>
+    <p class="subtitle">Upload a schema with one or more tables, configure sample seeds, and generate referentially consistent synthetic data.</p>
+  </div>
+  <label class="theme-toggle" title="Toggle light / dark mode" onclick="toggleTheme()">
+    <span>&#9790;</span>
+    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+    <span>&#9788;</span>
+  </label>
+</div>
 
 <div id="alertBox" class="alert"></div>
 
@@ -277,12 +330,21 @@ HTML_CONTENT = r"""<!DOCTYPE html>
     </div>
     <div class="collapse-body" id="schemaCollapseBody">
       <div class="hint" style="margin-top:0.75rem;">
-        Optionally seed any column with comma-separated <strong style="color:#e2e8f0">literals</strong> or
-        <strong style="color:#e2e8f0">regex patterns</strong> &mdash; the generator randomises a match each row.<br>
-        Examples: <code>Alice, Bob</code> &nbsp;|&nbsp; <code>ORD-[A-Z]{2}[0-9]{4}</code> &nbsp;|&nbsp;
-        <code>Alice, LI-[0-9]{4}</code>
+        Optionally seed any column with comma-separated <strong style="color:#e2e8f0">literals</strong>,
+        <strong style="color:#e2e8f0">regex patterns</strong>, or
+        <strong style="color:#e2e8f0">{variables}</strong> &mdash; the generator randomises a value each row.<br>
+        <span style="color:#6366f1;font-weight:600">Regex:</span>
+        <code>ORD-[A-Z]{2}[0-9]{4}</code> &nbsp;
+        <span style="color:#6366f1;font-weight:600">Variables:</span>
+        <code>{first_name}</code> <code>{last_name}</code> <code>{full_name}</code>
+        <code>{email}</code> <code>{username}</code> <code>{city}</code>
+        <code>{country}</code> <code>{company}</code> <code>{job_title}</code>
+        <code>{male_name}</code> <code>{female_name}</code> <code>{street}</code><br>
+        Mix freely: <code>{first_name}, Alice, BOB-[0-9]{4}</code> &nbsp;|&nbsp;
+        Template: <code>{first_name} {last_name}</code> &nbsp;|&nbsp;
+        <code>{first_name}.{last_name}@corp.com</code>
         &nbsp;&nbsp;<span style="color:#475569">&bull;</span>&nbsp;&nbsp;
-        <span style="color:#6366f1;">&#8594;</span> columns marked <span class="fk-badge">FK</span> are auto-filled from the parent table &mdash; no seed needed.
+        <span style="color:#6366f1;">&#8594;</span> columns marked <span class="fk-badge">FK</span> are auto-filled from the parent table.
       </div>
       <div class="tabs" id="schemaTabs"></div>
       <div id="schemaPanels"></div>
@@ -311,9 +373,22 @@ HTML_CONTENT = r"""<!DOCTYPE html>
 </div>
 
 <script>
-  let currentSchema = null;   // {tables:[{name,columns,foreign_keys}]}
-  let generatedData  = null;   // {tables:[{name,columns,rows}]}
-  let _lastCounts   = {};      // {table_name: count} — from last /table-counts call
+  let currentSchema = null;
+  let generatedData  = null;
+  let _lastCounts   = {};
+
+  // ── Theme ──────────────────────────────────────────────────────────────────
+  (function initTheme() {
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+  })();
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function escapeHtml(str) {
